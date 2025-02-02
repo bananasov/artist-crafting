@@ -1,7 +1,7 @@
 {
   "bundle": {
     "modules_identifier": "__DARKLUA_BUNDLE_MODULES",
-    "excludes": ["cc.*", "artist.*"],
+    "excludes": ["cc.*", "artist.*", "metis.*"],
 
     "require_mode": {
       "name": "path"
