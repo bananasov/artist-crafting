@@ -1,16 +1,20 @@
 set shell := ["sh", "-c"]
 set windows-shell := ["pwsh.exe", "-c"]
 
-export PROJECT_NAME := "reborn-furni"
+export PROJECT_NAME := "artist-crafting"
 
+# Package entire project into a single minified lua file
 package: bundle
-    darklua minify out/.lua out/.min.lua
+    darklua minify out/{{PROJECT_NAME}}.lua out/{{PROJECT_NAME}}.min.lua
 
+# Bundle all imports into a single file
 bundle:
-    darklua process ./src/main.lua out/.lua
+    darklua process ./src/main.lua out/{{PROJECT_NAME}}.lua
 
+# Lint the source code
 lint:
-	selene $(git ls-files | rg '\.lua')
+	@selene src/
 
+# Format the source code with stylua
 format:
-    stylua --glob '**/*.lua' -- src
+    @stylua --glob '**/*.lua' -- src
