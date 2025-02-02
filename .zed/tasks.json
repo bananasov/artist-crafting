@@ -1,0 +1,35 @@
+[
+  {
+    "label": "Plugin: Package project",
+    "command": "just package",
+    "cwd": "plugin/",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "reveal_target": "dock",
+    "hide": "never",
+    "shell": "system"
+  },
+  {
+    "label": "Plugin: Lint project",
+    "command": "just lint",
+    "cwd": "plugin/",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "reveal_target": "dock",
+    "hide": "never",
+    "shell": "system"
+  },
+  {
+    "label": "Plugin: Format project",
+    "command": "just format",
+    "cwd": "plugin/",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "reveal_target": "dock",
+    "hide": "never",
+    "shell": "system"
+  }
+]
