@@ -1,6 +1,6 @@
 use actix_web::{HttpResponse, get, web};
 
-#[get("/")]
+#[get("")]
 async fn recipes_index() -> HttpResponse {
     HttpResponse::Ok().body("hi")
 }
