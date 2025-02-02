@@ -1,0 +1,16 @@
+set shell := ["sh", "-c"]
+set windows-shell := ["pwsh.exe", "-c"]
+
+export PROJECT_NAME := "reborn-furni"
+
+package: bundle
+    darklua minify out/.lua out/.min.lua
+
+bundle:
+    darklua process ./src/main.lua out/.lua
+
+lint:
+	selene $(git ls-files | rg '\.lua')
+
+format:
+    stylua --glob '**/*.lua' -- src
