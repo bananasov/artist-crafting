@@ -2,6 +2,7 @@ use std::env;
 
 use actix_web::{App, HttpResponse, HttpServer, get, middleware, web};
 use artist_crafting::{AppState, routes};
+use migration::{Migrator, MigratorTrait};
 use sea_orm::Database;
 
 #[get("/")]
@@ -10,7 +11,7 @@ async fn hello() -> Result<HttpResponse, actix_web::Error> {
 }
 
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
     dotenvy::dotenv().ok();
@@ -19,11 +20,13 @@ async fn main() -> std::io::Result<()> {
     let port = env::var("PORT").expect("PORT is not set in .env file");
     let server_url = format!("{host}:{port}");
 
-    let conn = Database::connect(&db_url)
+    let db = Database::connect(&db_url)
         .await
         .expect("Failed to connect to the database");
 
-    let state = AppState { db: conn };
+    Migrator::up(&db, None).await?;
+
+    let state = AppState { db };
 
     tracing::info!("Starting HTTP server on {server_url}");
 
@@ -37,5 +40,7 @@ async fn main() -> std::io::Result<()> {
     })
     .bind(server_url)?
     .run()
-    .await
+    .await?;
+
+    Ok(())
 }
