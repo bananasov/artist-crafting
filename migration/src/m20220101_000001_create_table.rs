@@ -21,8 +21,8 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Tags::ArchiveName).text().not_null())
                     .col(ColumnDef::new(Tags::PathInArchive).text().not_null())
                     .col(ColumnDef::new(Tags::Namespace).text().null())
-                    .col(ColumnDef::new(Tags::Replace).boolean().null())
-                    .col(ColumnDef::new(Tags::TagValues).text().not_null())
+                    .col(ColumnDef::new(Tags::TagType).text().not_null())
+                    .col(ColumnDef::new(Tags::TagData).json().not_null())
                     .col(
                         ColumnDef::new(Tags::CreatedAt)
                             .timestamp()
@@ -154,8 +154,8 @@ enum Tags {
     ArchiveName,
     PathInArchive,
     Namespace,
-    Replace,
-    TagValues,
+    TagType,
+    TagData,
     CreatedAt,
 }
 
