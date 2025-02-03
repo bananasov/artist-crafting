@@ -1,6 +1,7 @@
+use sea_orm::FromJsonQueryResult;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct Tag {
     /// Whether or not the contents of this tag should completely replace tag contents from different
     /// lower priority data packs with the same resource location.

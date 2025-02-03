@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
+use sea_orm::FromJsonQueryResult;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, FromJsonQueryResult)]
 #[serde(tag = "type")]
 pub enum Recipe {
     /// Represents a shaped crafting recipe in a crafting table.
@@ -133,21 +134,21 @@ pub enum Recipe {
     Unknown,
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, FromJsonQueryResult)]
 #[serde(untagged)]
 pub enum IngredientEntry {
     Object(KeyValue),
     Array(Vec<KeyValue>),
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, FromJsonQueryResult)]
 #[serde(untagged)]
 pub enum KeyValue {
     Tag { tag: String },
     Item { item: String },
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct RecipeResult {
     pub item: String,
     #[serde(skip_serializing_if = "Option::is_none")]
