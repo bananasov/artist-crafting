@@ -12,6 +12,7 @@ pub struct Model {
     pub path_in_archive: String,
     pub namespace: Option<String>,
     pub tag_type: String,
+    #[sea_orm(column_type = "Json")]
     pub tag_data: Tag,
     pub created_at: DateTimeWithTimeZone,
 }
