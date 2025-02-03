@@ -19,6 +19,7 @@ tracing = "0.1.41"
 tracing-subscriber = "0.3.19"
 dotenvy = "0.15.7"
 migration = { path = "./migration" }
+rc-zip-sync = "4.2.4"
 
 [workspace]
 resolver = "3"
