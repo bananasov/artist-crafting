@@ -1,11 +1,10 @@
-use std::{env, sync::Arc};
+use std::env;
 
 use actix_governor::{Governor, GovernorConfigBuilder};
 use actix_web::{App, HttpResponse, HttpServer, get, middleware, web};
-use artist_crafting::{AppState, routes};
+use artist_crafting::{AppState, TOTP_FUCKERY, routes};
 use migration::{Migrator, MigratorTrait};
 use sea_orm::Database;
-use totp_rs::{Algorithm, TOTP};
 
 #[get("/")]
 async fn hello() -> Result<HttpResponse, actix_web::Error> {
@@ -20,6 +19,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
     let host = env::var("HOST").expect("HOST is not set in .env file");
     let port = env::var("PORT").expect("PORT is not set in .env file");
+
     let server_url = format!("{host}:{port}");
 
     let db = Database::connect(&db_url)
@@ -37,6 +37,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap();
 
     tracing::info!("Starting HTTP server on {server_url}");
+
+    let secret_base32 = TOTP_FUCKERY.get_secret_base32();
+    tracing::info!("Base32 secret for TOTP: {secret_base32}");
 
     HttpServer::new(move || {
         App::new()

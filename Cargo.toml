@@ -24,6 +24,8 @@ totp-rs = { version = "5.6.0", features = ["qr"] }
 actix-governor = "0.8.0"
 futures = "0.3.31"
 futures-util = "0.3.31"
+thiserror = "2.0.11"
+chrono = { version = "0.4.39", features = ["serde"] }
 
 [workspace]
 resolver = "3"

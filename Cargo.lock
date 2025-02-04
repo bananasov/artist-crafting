@@ -355,6 +355,7 @@ version = "0.1.0"
 dependencies = [
  "actix-governor",
  "actix-web",
+ "chrono",
  "dotenvy",
  "futures",
  "futures-util",
@@ -363,6 +364,7 @@ dependencies = [
  "sea-orm",
  "serde",
  "serde_json",
+ "thiserror 2.0.11",
  "totp-rs",
  "tracing",
  "tracing-subscriber",
