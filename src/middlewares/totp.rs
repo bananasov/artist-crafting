@@ -1,89 +1,68 @@
-use std::{
-    future::{Ready, ready},
-    rc::Rc,
+use crate::{TOTP_FUCKERY, errors::totp::TOTPError};
+use actix_web::{
+    Error,
+    dev::{Service, ServiceRequest, ServiceResponse, Transform, forward_ready},
 };
+use futures::future::{LocalBoxFuture, Ready, ready};
 
-use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform, forward_ready};
-use futures_util::future::LocalBoxFuture;
-use totp_rs::TOTP;
+pub struct TOTPGuard;
 
-use crate::errors::totp::TOTPError;
-
-pub struct TOTPMiddleware {
-    totp: Rc<TOTP>,
-}
-
-impl TOTPMiddleware {
-    pub fn new(totp: TOTP) -> Self {
-        Self {
-            totp: Rc::new(totp),
-        }
-    }
-}
-
-impl<S, B> Transform<S, ServiceRequest> for TOTPMiddleware
+impl<S, B> Transform<S, ServiceRequest> for TOTPGuard
 where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = actix_web::Error>,
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
     S::Future: 'static,
     B: 'static,
 {
     type Response = ServiceResponse<B>;
-    type Error = actix_web::Error;
+    type Error = Error;
+    type Transform = TOTPGuardMiddleware<S>;
     type InitError = ();
-    type Transform = TOTPMiddlewareService<S>;
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        ready(Ok(TOTPMiddlewareService {
-            service,
-            totp: self.totp.clone(),
-        }))
+        ready(Ok(TOTPGuardMiddleware { service }))
     }
 }
 
-pub struct TOTPMiddlewareService<S> {
+pub struct TOTPGuardMiddleware<S> {
     service: S,
-    totp: Rc<TOTP>,
 }
 
-impl<S, B> Service<ServiceRequest> for TOTPMiddlewareService<S>
+impl<S, B> Service<ServiceRequest> for TOTPGuardMiddleware<S>
 where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = actix_web::Error>,
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
     S::Future: 'static,
     B: 'static,
 {
     type Response = ServiceResponse<B>;
-    type Error = actix_web::Error;
+    type Error = Error;
     type Future = LocalBoxFuture<'static, Result<Self::Response, Self::Error>>;
 
     forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        let totp = self.totp.clone();
-        let auth = req.headers().get("X-TOTP-Code");
-        if let Some(code) = auth {
-            if let Ok(token_str) = code.to_str() {
-                let res = totp.check_current(token_str);
-                if let Ok(accepted) = res {
-                    if accepted {
-                        let fut = self.service.call(req);
-                        return Box::pin(async move {
-                            let res = fut.await?;
-
-                            Ok(res)
-                        });
-                    }
-                }
-            }
-
-            return Box::pin(async move { Err(TOTPError::Unauthorized.into()) });
+        if !is_valid_totp(&req) {
+            let error = TOTPError::Unauthorized.into();
+            Box::pin(async move { Err(error) })
+        } else {
+            let fut = self.service.call(req);
+            Box::pin(fut)
         }
-
-        let fut = self.service.call(req);
-        Box::pin(async move {
-            let res = fut.await?;
-
-            Ok(res)
-        })
     }
+}
+
+fn is_valid_totp(req: &ServiceRequest) -> bool {
+    let totp_code = req
+        .headers()
+        .get("x-totp-code")
+        .or_else(|| req.headers().get("X-TOTP-Code"))
+        .and_then(|h| h.to_str().ok());
+    let totp_code_nya = match totp_code {
+        Some(code) => code,
+        None => return false,
+    };
+
+    tracing::info!("Received TOTP code: {}", totp_code_nya);
+
+    TOTP_FUCKERY.check_current(totp_code_nya).unwrap_or(false)
 }

@@ -13,7 +13,7 @@ pub static TOTP_FUCKERY: LazyLock<TOTP> = LazyLock::new(|| {
     let totp_secret = env::var("TOTP_SECRET").expect("TOTP_SECRET is not set .env file");
     TOTP::new(
         Algorithm::SHA1,
-        8,
+        6,
         1,
         30,
         totp_secret.into_bytes(),

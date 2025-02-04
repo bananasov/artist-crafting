@@ -3,14 +3,13 @@ pub mod collector;
 
 use actix_web::web;
 
-use crate::TOTP_FUCKERY;
-use crate::middlewares::totp::TOTPMiddleware;
+use crate::middlewares::totp::TOTPGuard;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(web::scope("/api").configure(api::config));
     cfg.service(
         web::scope("/collector")
-            .wrap(TOTPMiddleware::new(TOTP_FUCKERY.clone())) // CURSED AS FUCK BUT I LOVE CURSED STUFF nya~
+            .wrap(TOTPGuard)
             .configure(collector::config),
     );
 }
