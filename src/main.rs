@@ -1,9 +1,11 @@
-use std::env;
+use std::{env, sync::Arc};
 
+use actix_governor::{Governor, GovernorConfigBuilder};
 use actix_web::{App, HttpResponse, HttpServer, get, middleware, web};
 use artist_crafting::{AppState, routes};
 use migration::{Migrator, MigratorTrait};
 use sea_orm::Database;
+use totp_rs::{Algorithm, TOTP};
 
 #[get("/")]
 async fn hello() -> Result<HttpResponse, actix_web::Error> {
@@ -28,12 +30,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let state = AppState { db };
 
+    let governor_conf = GovernorConfigBuilder::default()
+        .requests_per_second(2)
+        .burst_size(5)
+        .finish()
+        .unwrap();
+
     tracing::info!("Starting HTTP server on {server_url}");
 
     HttpServer::new(move || {
         App::new()
             .wrap(middleware::Logger::default())
             .wrap(middleware::NormalizePath::trim())
+            .wrap(Governor::new(&governor_conf))
             .app_data(web::Data::new(state.clone()))
             .configure(routes::config)
             .service(hello)

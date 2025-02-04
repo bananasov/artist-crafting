@@ -20,6 +20,10 @@ tracing-subscriber = "0.3.19"
 dotenvy = "0.15.7"
 migration = { path = "./migration" }
 rc-zip-sync = "4.2.4"
+totp-rs = { version = "5.6.0", features = ["qr"] }
+actix-governor = "0.8.0"
+futures = "0.3.31"
+futures-util = "0.3.31"
 
 [workspace]
 resolver = "3"
